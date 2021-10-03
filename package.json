@@ -1,18 +1,18 @@
 {
-  "name": "blk-design-system-react",
-  "version": "1.2.0",
-  "description": "React version of BLK Design System by Creative Tim",
+  "name": "election_dapp",
+  "version": "1.0.0",
+  "description": "",
   "main": "index.js",
-  "author": "Creative Tim",
+  "author": "",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/creativetimofficial/blk-design-system-react.git"
+    "url": "git+https://github.com/chinalantern/election_dapp.git"
   },
   "bugs": {
-    "url": "https://github.com/creativetimofficial/blk-design-system-react/issues"
+    "url": ""
   },
-  "homepage": "https://demos.creative-tim.com/blk-design-system-react/#/",
+  "homepage": "",
   "keywords": [
     "react",
     "reactjs",
@@ -40,6 +40,7 @@
     "classnames": "2.2.6",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
+    "lite-server": "2.6.1",
     "moment": "2.29.1",
     "node-sass": "4.14.1",
     "node-sass-package-importer": "5.3.2",
@@ -59,6 +60,7 @@
     "typescript": "4.1.2"
   },
   "scripts": {
+    "dev": "lite-server",
     "start": "react-scripts start",
     "build": "react-scripts build && gulp licenses",
     "test": "react-scripts test",
