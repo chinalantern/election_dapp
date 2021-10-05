@@ -1,25 +1,12 @@
-/*!
+import React from 'react'
 
-=========================================================
-* BLK Design System React - v1.2.0
-=========================================================
+import { ethers } from 'ethers'
 
-* Product Page: https://www.creative-tim.com/product/blk-design-system-react
-* Copyright 2020 Creative Tim (https://www.creative-tim.com)
-* Licensed under MIT (https://github.com/creativetimofficial/blk-design-system-react/blob/main/LICENSE.md)
-
-* Coded by Creative Tim
-
-=========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-*/
-import React from "react";
 // react plugin used to create charts
-import { Line } from "react-chartjs-2";
+import { Line } from 'react-chartjs-2'
 // reactstrap components
 import {
+  Table,
   Button,
   Card,
   CardHeader,
@@ -31,22 +18,130 @@ import {
   Container,
   Row,
   Col,
-} from "reactstrap";
+} from 'reactstrap'
 
 // core components
-import ExamplesNavbar from "components/Navbars/ExamplesNavbar.js";
-import Footer from "components/Footer/Footer.js";
+import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js'
+import Footer from 'components/Footer/Footer.js'
 
-import bigChartData from "variables/charts.js";
+import bigChartData from 'variables/charts.js'
 
-export default function LandingPage() {
+const LandingPage = (props) => {
+
+  var provider;
+  /*************************************************************/
+  /* Step 1: Init Metamask                                     */
+  /*  Connect to the default http://localhost:8545             */
+  /*  const provider = new ethers.providers.JsonRpcProvider(); */
+  /*************************************************************/
+
+  const initProvider = async () => {
+    provider = new ethers.providers.Web3Provider(window.ethereum)
+    const signer = provider.getSigner()
+
+    // Get the balance of an account (by address or ENS name, if supported by network)
+    // const balance = (await provider.getBalance())
+
+    console.log('this is my provider', provider)
+    console.log('this is my signer', signer)
+    // console.log('this is my balance', balance)
+  }
+
+  initProvider()
+
+  /*************************************************************************/
+  /* Step 2: Detect/Handle chain (network) and chainChanged (per EIP-1193) */
+  /*************************************************************************/
+  const mChain = async () => {
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+    // window.ethereum.on('chainChanged', handleChainChanged(chainId))
+  }
+
+  function handleChainChanged(_chainId) {
+    // Add code to handle new _chainId then reload
+    console.log('reloading page')
+    window.location.reload()
+  }
+
+  /*******************************************************************/
+  /* Step 3: Handle user accounts and accountsChanged (per EIP-1193) */
+  /*******************************************************************/
+  let currentAccount = null
+
+  // FIXME change to async
+  window.ethereum
+    .request({ method: 'eth_accounts' })
+    .then(handleAccountsChanged)
+    .catch((err) => {
+      // eth_accounts will return an empty array.
+      console.error(err)
+    })
+
+  // Note that this event is emitted on page load.
+  // If the array of accounts is non-empty, you're already
+  // connected.
+  window.ethereum.on('accountsChanged', handleAccountsChanged)
+
+  // eth_accounts return an array
+  function handleAccountsChanged(accounts) {
+    if (accounts.length === 0) {
+      // MetaMask is locked or the user has not connected any accounts
+      console.log('Please connect to MetaMask.')
+    } else if (accounts[0] !== currentAccount) {
+      currentAccount = accounts[0]
+    }
+  }
+
   React.useEffect(() => {
-    document.body.classList.toggle("landing-page");
+    document.body.classList.toggle('landing-page')
     // Specify how to clean up after this effect:
     return function cleanup() {
-      document.body.classList.toggle("landing-page");
-    };
-  },[]);
+      document.body.classList.toggle('landing-page')
+    }
+  }, [])
+
+  // TODO Connect to and make an instance of the Election contract
+  // The Election contract object
+  const electionContract = () => {
+    // Contract address or ENS like "dai.tokens.ethers.eth"
+    // const electionAddress = 'Election.json'
+    const electionAddress = '0x79ec8671f205078f0d27426c34cb1e4f2f455d1c'
+    
+    // Contract ABI. Ignore any methods not needed
+     // Human readable example: Get the account balance. "function balanceOf(address) view returns (uint)",
+    const electionAbi = [{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidate","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}]
+    return new ethers.Contract(electionAddress, electionAbi, provider)
+  }
+
+  console.log('Outputting the initContract', electionContract())
+
+
+  // TODO Render the data to the UI
+
+
+
+  
+
+  // TODO Load the account data
+  // connect()
+
+  // function connect() {
+  //   window.ethereum
+  //     .request({ method: 'eth_requestAccounts' })
+  //     .then(handleAccountsChanged)
+  //     .catch((err) => {
+  //       if (err.code === 4001) {
+  //         // EIP-1193 userRejectedRequest error
+  //         // If this happens, the user rejected the connection request.
+  //         console.log('Please connect to MetaMask.')
+  //       } else {
+  //         console.error(err)
+  //       }
+  //     })
+  // }
+
+  
+
   return (
     <>
       <ExamplesNavbar />
@@ -55,32 +150,32 @@ export default function LandingPage() {
           <img
             alt="..."
             className="path"
-            src={require("assets/img/blob.png").default}
+            src={require('assets/img/blob.png').default}
           />
           <img
             alt="..."
             className="path2"
-            src={require("assets/img/path2.png").default}
+            src={require('assets/img/path2.png').default}
           />
           <img
             alt="..."
             className="shapes triangle"
-            src={require("assets/img/triunghiuri.png").default}
+            src={require('assets/img/triunghiuri.png').default}
           />
           <img
             alt="..."
             className="shapes wave"
-            src={require("assets/img/waves.png").default}
+            src={require('assets/img/waves.png').default}
           />
           <img
             alt="..."
             className="shapes squares"
-            src={require("assets/img/patrat.png").default}
+            src={require('assets/img/patrat.png').default}
           />
           <img
             alt="..."
             className="shapes circle"
-            src={require("assets/img/cercuri.png").default}
+            src={require('assets/img/cercuri.png').default}
           />
           <div className="content-center">
             <Row className="row-grid justify-content-between align-items-center text-left">
@@ -141,18 +236,45 @@ export default function LandingPage() {
                 <img
                   alt="..."
                   className="img-fluid"
-                  src={require("assets/img/etherum.png").default}
+                  src={require('assets/img/etherum.png').default}
                 />
               </Col>
             </Row>
           </div>
         </div>
+
+        <Container>
+          <Card className="card-coin card-plain">
+            <Table hover dark>
+              <thead>
+                <tr>
+                  <th className="text-center">#</th>
+                  <th className="text-center">Name</th>
+                  <th className="text-center">Votes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="text-center">1</td>
+                  <td className="text-center">fake_candidate_1</td>
+                  <td className="text-center">fake_number_votes</td>
+                </tr>
+                <tr>
+                  <td className="text-center">2</td>
+                  <td className="text-center">fake_candidate_2</td>
+                  <td className="text-center">fake_number_votes again</td>
+                </tr>
+              </tbody>
+            </Table>
+          </Card>
+        </Container>
+
         <section className="section section-lg">
           <section className="section">
             <img
               alt="..."
               className="path"
-              src={require("assets/img/path4.png").default}
+              src={require('assets/img/path4.png').default}
             />
             <Container>
               <Row className="row-grid justify-content-between">
@@ -265,7 +387,7 @@ export default function LandingPage() {
                       href="#pablo"
                       onClick={(e) => e.preventDefault()}
                     >
-                      Show all{" "}
+                      Show all{' '}
                       <i className="tim-icons icon-minimal-right text-info" />
                     </a>
                   </div>
@@ -278,17 +400,17 @@ export default function LandingPage() {
           <img
             alt="..."
             className="path"
-            src={require("assets/img/path4.png").default}
+            src={require('assets/img/path4.png').default}
           />
           <img
             alt="..."
             className="path2"
-            src={require("assets/img/path5.png").default}
+            src={require('assets/img/path5.png').default}
           />
           <img
             alt="..."
             className="path3"
-            src={require("assets/img/path2.png").default}
+            src={require('assets/img/path2.png').default}
           />
           <Container>
             <Row className="justify-content-center">
@@ -346,7 +468,7 @@ export default function LandingPage() {
           <img
             alt="..."
             className="path"
-            src={require("assets/img/path5.png").default}
+            src={require('assets/img/path5.png').default}
           />
           <Container>
             <Row className="row-grid justify-content-between">
@@ -354,7 +476,7 @@ export default function LandingPage() {
                 <img
                   alt="..."
                   className="img-fluid floating"
-                  src={require("assets/img/chester-wade.jpg").default}
+                  src={require('assets/img/chester-wade.jpg').default}
                 />
                 <Card className="card-stats bg-danger">
                   <CardBody>
@@ -439,12 +561,12 @@ export default function LandingPage() {
           <img
             alt="..."
             className="path"
-            src={require("assets/img/path4.png").default}
+            src={require('assets/img/path4.png').default}
           />
           <img
             alt="..."
             className="path2"
-            src={require("assets/img/path2.png").default}
+            src={require('assets/img/path2.png').default}
           />
           <Col md="12">
             <Card className="card-chart card-plain">
@@ -472,14 +594,14 @@ export default function LandingPage() {
           <img
             alt="..."
             className="path"
-            src={require("assets/img/path3.png").default}
+            src={require('assets/img/path3.png').default}
           />
           <Container>
             <Row>
               <Col md="4">
                 <hr className="line-info" />
                 <h1>
-                  Choose the coin{" "}
+                  Choose the coin{' '}
                   <span className="text-info">that fits your needs</span>
                 </h1>
               </Col>
@@ -491,7 +613,7 @@ export default function LandingPage() {
                     <img
                       alt="..."
                       className="img-center img-fluid"
-                      src={require("assets/img/bitcoin.png").default}
+                      src={require('assets/img/bitcoin.png').default}
                     />
                   </CardHeader>
                   <CardBody>
@@ -523,7 +645,7 @@ export default function LandingPage() {
                     <img
                       alt="..."
                       className="img-center img-fluid"
-                      src={require("assets/img/etherum.png").default}
+                      src={require('assets/img/etherum.png').default}
                     />
                   </CardHeader>
                   <CardBody>
@@ -555,7 +677,7 @@ export default function LandingPage() {
                     <img
                       alt="..."
                       className="img-center img-fluid"
-                      src={require("assets/img/ripp.png").default}
+                      src={require('assets/img/ripp.png').default}
                     />
                   </CardHeader>
                   <CardBody>
@@ -587,5 +709,7 @@ export default function LandingPage() {
         <Footer />
       </div>
     </>
-  );
+  )
 }
+
+export default LandingPage

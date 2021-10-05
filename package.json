@@ -38,6 +38,7 @@
     "bootstrap": "4.5.3",
     "chart.js": "2.9.4",
     "classnames": "2.2.6",
+    "ethers": "^5.4.7",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "lite-server": "2.6.1",
@@ -53,7 +54,8 @@
     "react-router-dom": "5.2.0",
     "react-scripts": "4.0.3",
     "reactstrap": "8.7.1",
-    "web-vitals": "1.0.1"
+    "web-vitals": "1.0.1",
+    "web3": "^1.6.0"
   },
   "optionalDependencies": {
     "jquery": "3.5.1",
