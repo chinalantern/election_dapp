@@ -38,7 +38,7 @@
     "bootstrap": "4.5.3",
     "chart.js": "2.9.4",
     "classnames": "2.2.6",
-    "ethers": "^5.4.7",
+    "ethers": "^5.5.1",
     "gulp": "4.0.2",
     "gulp-append-prepend": "1.0.8",
     "lite-server": "2.6.1",

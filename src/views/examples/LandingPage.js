@@ -1,4 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+
+// This function detects most providers injected at window.ethereum
+// import detectEthereumProvider from '@metamask/detect-provider'
 
 import { ethers } from 'ethers'
 
@@ -20,15 +23,25 @@ import {
   Col,
 } from 'reactstrap'
 
+import bigChartData from 'variables/charts.js'
+
 // core components
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js'
 import Footer from 'components/Footer/Footer.js'
 
-import bigChartData from 'variables/charts.js'
 
-const LandingPage = (props) => {
 
-  var provider;
+
+const LandingPage = () => {
+  // const [candidates, setCandidates] = useState([
+  //   {
+  //     id: null,
+  //     name: '',
+  //     voteCount: 0,
+  //   },
+  // ])
+
+  var provider
   /*************************************************************/
   /* Step 1: Init Metamask                                     */
   /*  Connect to the default http://localhost:8545             */
@@ -37,13 +50,12 @@ const LandingPage = (props) => {
 
   const initProvider = async () => {
     provider = new ethers.providers.Web3Provider(window.ethereum)
-    const signer = provider.getSigner()
 
     // Get the balance of an account (by address or ENS name, if supported by network)
     // const balance = (await provider.getBalance())
 
-    console.log('this is my provider', provider)
-    console.log('this is my signer', signer)
+    // console.log('this is my provider', provider)
+    // console.log('this is my signer', signer)
     // console.log('this is my balance', balance)
   }
 
@@ -52,8 +64,8 @@ const LandingPage = (props) => {
   /*************************************************************************/
   /* Step 2: Detect/Handle chain (network) and chainChanged (per EIP-1193) */
   /*************************************************************************/
-  const mChain = async () => {
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' })
+  const chainId = async () => {
+    return await window.ethereum.request({ method: 'eth_chainId' })
     // window.ethereum.on('chainChanged', handleChainChanged(chainId))
   }
 
@@ -92,55 +104,224 @@ const LandingPage = (props) => {
     }
   }
 
-  React.useEffect(() => {
-    document.body.classList.toggle('landing-page')
-    // Specify how to clean up after this effect:
-    return function cleanup() {
-      document.body.classList.toggle('landing-page')
-    }
-  }, [])
+  // useEffect(() => {
+  //   document.body.classList.toggle('landing-page')
+  //   // Specify how to clean up after this effect:
+  //   return function cleanup() {
+  //     document.body.classList.toggle('landing-page')
+  //   }
+  // }, [])
 
-  // TODO Connect to and make an instance of the Election contract
-  // The Election contract object
-  const electionContract = () => {
-    // Contract address or ENS like "dai.tokens.ethers.eth"
-    // const electionAddress = 'Election.json'
-    const electionAddress = '0x79ec8671f205078f0d27426c34cb1e4f2f455d1c'
-    
-    // Contract ABI. Ignore any methods not needed
-     // Human readable example: Get the account balance. "function balanceOf(address) view returns (uint)",
-    const electionAbi = [{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"constant":true,"inputs":[],"name":"candidate","outputs":[{"internalType":"string","name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"}]
-    return new ethers.Contract(electionAddress, electionAbi, provider)
-  }
-
-  console.log('Outputting the initContract', electionContract())
-
-
-  // TODO Render the data to the UI
-
-
-
+  // Contract address or ENS like "dai.tokens.ethers.eth"
+  // const electionAddress = 'Election.json'
+  const electionAddress = '0x8cFBBE48BdAC02d2A9F3AB98f5ba7529a63FF9e5'
+  // Contract ABI. Ignore any methods not needed
+  // Human readable example: Get the account balance. "function balanceOf(address) view returns (uint)",
+  const electionAbi = [
+    {
+      inputs: [],
+      payable: false,
+      stateMutability: 'nonpayable',
+      type: 'constructor',
+    },
+    {
+      constant: true,
+      inputs: [
+        {
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256',
+        },
+      ],
+      name: 'candidates',
+      outputs: [
+        {
+          internalType: 'uint16',
+          name: 'voteCount',
+          type: 'uint16',
+        },
+        {
+          internalType: 'uint256',
+          name: 'id',
+          type: 'uint256',
+        },
+        {
+          internalType: 'string',
+          name: 'name',
+          type: 'string',
+        },
+      ],
+      payable: false,
+      stateMutability: 'view',
+      type: 'function',
+    },
+    {
+      constant: true,
+      inputs: [],
+      name: 'candidatesCount',
+      outputs: [
+        {
+          internalType: 'uint16',
+          name: '',
+          type: 'uint16',
+        },
+      ],
+      payable: false,
+      stateMutability: 'view',
+      type: 'function',
+    },
+  ]
   
+  
+  function CandidateInfo(_id, _name, _voteCount){
+    this.id = _id
+    this.name = _name
+    this.voteCount = _voteCount
+  }
+  
+  const getCandidateInfo = async () => {
+    // FIXME Convert electionInfoArray, candidate count etc into State Vars for REACT
+    const electionInfoArray = []
+    // connect signer to metamask acct. instantiate contract instance obj
+    const contractInstance = new ethers.Contract(electionAddress,electionAbi,provider)
+    const totalCandidates = await contractInstance.candidatesCount()
+   
+    for (let i = 0; i < totalCandidates; i++) {
+      const candidate = await contractInstance.candidates(i)
+      let candInfo = new CandidateInfo(candidate.id, candidate.name, candidate.voteCount)
+      // FIXME this is the spot where we whould be updating the state variable
+      // then another ui function can check the state var for info
+      electionInfoArray[i] = candInfo
+    }
+    return electionInfoArray
+  }
+      
 
-  // TODO Load the account data
-  // connect()
-
-  // function connect() {
-  //   window.ethereum
-  //     .request({ method: 'eth_requestAccounts' })
-  //     .then(handleAccountsChanged)
-  //     .catch((err) => {
-  //       if (err.code === 4001) {
-  //         // EIP-1193 userRejectedRequest error
-  //         // If this happens, the user rejected the connection request.
-  //         console.log('Please connect to MetaMask.')
-  //       } else {
-  //         console.error(err)
-  //       }
-  //     })
+  getCandidateInfo().then(data => {
+    console.log(data)
+  })
+  
+  // for (let i = 0; i < candidateCount; i++) {
+  //   const candidate = candidates[i];
+  //   electionCandidate.id = candidate.id
+  //   electionCandidate.name = candidate.name
+  //   electionCandidate.voteCount = candidate.voteCount
   // }
 
-  
+  // console.log('QQQQQQQQQQQ', ...electionCandidate)
+
+  // get the data from the contract
+  // const getElectionCandidates = async () => {
+  //   let cInfo
+  //   let cCount = await electionContract.candidatesCount
+  //   for (let i = 0; i < cCount; i++) {
+  //     const candidate = electionContract.candidates[i]
+  //     const id = candidate.id
+  //     const name = candidate.name
+  //     const voteCount = candidate.voteCount
+
+  //     cInfo = candidate
+  //   }
+  //   console.log('lhfkfj', cInfo)
+  //   return cInfo
+  // }
+
+  // const candidate = getElectionCandidates()
+
+  // const getCandidates = async () => {
+  //   const candidateCount = await electionContract().candidatesCount()
+  //   console.log('Candidate Count: ', candidateCount)
+  //   for (let i = 0; i <= candidateCount; i++) {
+  //     await electionContract()
+  //       .candidates(i)
+  //       .then((contractCandidate) => {
+  //         let newCandidateObject = {
+  //           id: contractCandidate.id,
+  //           name: contractCandidate.name,
+  //           voteCount: contractCandidate.voteCount,
+  //         }
+  //         console.log('Candidates pulled: ', contractCandidate.name,)
+  //         setCandidates([i].push(newCandidateObject))
+  //       })
+  //   }
+  // }
+
+  const formatTableData = (_count, candidates) => {
+    return (
+      <tr>
+        <td className="text-center">_count</td>
+        <td className="text-center">_candidateObject.name</td>
+        <td className="text-center">_candidateObject.voteCount</td>
+      </tr>
+    )
+  }
+
+  /*************************************************************************/
+  /* We create a new MetaMask onboarding object to use in our app          */
+  /* Using the '@metamask/onboarding' library                              */
+  /*************************************************************************/
+  // const onboarding = new MetaMaskOnboarding({ forwarderOrigin })
+  //This will start the onboarding proccess
+  // const onClickInstall = () => {
+  //   onboardButton.innerText = 'Onboarding in progress'
+  //   onboardButton.disabled = true
+  //   //On this object we have startOnboarding which will start the onboarding process for our end user
+  //   onboarding.startOnboarding()
+  // }
+
+  // is metamask installed
+  // FIXME Implement this but as React //If it isn't installed we ask the user to click to install it
+  // onboardButton.innerText = 'Click here to install MetaMask!';
+  //When the button is clicked we call this function
+  // onboardButton.onclick = onClickInstall;
+  //The button is now disabled
+  // onboardButton.disabled = false;
+  const isMetaMaskInstalled = () => window.ethereum.isMetaMaskInstalled
+  isMetaMaskInstalled
+    ? console.log('METAMASK IS INSTALLED')
+    : alert('Install Metamask browser extension to connect Dapp.')
+
+  // can Metamask provider can talk to ethereum chain
+  const isMetamaskConnected = () => window.ethereum.isConnected()
+  // get Metamask chain id
+  const getChainId = async () => {
+    return await window.ethereum.request({ method: 'eth_chainId' })
+  }
+  // get Metamask network id
+  const getNetworkId = async () => {
+    return await window.ethereum.request({ method: 'net_version' })
+  }
+
+  // function to connect dapp with metamask wallet
+  // TODO Provide a button to allow the user to connect MetaMask to the dapp. Clicking this button should call the following method:
+  // const connectToDapp = async () => {
+  //   try {
+  //     const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+  //     const account = accounts[0]
+  //     return account
+  //   } catch (error) {
+  //     // if error code 4001 user rejected request
+  //     if (error.code === 4001) {
+  //       console.log('You must connect to MetaMask.')
+  //     } else {
+  //       console.log('Error connecting to metamask account:\n', error)
+  //       return error
+  //     }
+  //   }
+  // }
+
+  // if (isMetamaskConnected) {
+  //   ethereum.autoRefreshOnNetworkChange = false
+  //   // print to UI or log state chainId, networkId, and connect status
+  //   // TODO networkId = await getNetworkId()
+  //   // TODO chainId = await getChainId()
+  //   console.log('Metamask connected:', isMetamaskConnected())
+  //   // connect dapp with metamask wallet account
+  //   connectToDapp()
+  // } else {
+  //   alert('Connect available ethereum network!')
+  //   console.log('Connect available ethereum network!')
+  // }
 
   return (
     <>
@@ -254,7 +435,7 @@ const LandingPage = (props) => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
+                {/* <tr>
                   <td className="text-center">1</td>
                   <td className="text-center">fake_candidate_1</td>
                   <td className="text-center">fake_number_votes</td>
@@ -263,7 +444,7 @@ const LandingPage = (props) => {
                   <td className="text-center">2</td>
                   <td className="text-center">fake_candidate_2</td>
                   <td className="text-center">fake_number_votes again</td>
-                </tr>
+                </tr> */}
               </tbody>
             </Table>
           </Card>
