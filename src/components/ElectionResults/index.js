@@ -1,16 +1,13 @@
-import React from "react";
+import React from "react"
+import { ResultsTable } from "./resultsTable"
 
 
-const ElectionResults = () => {
+export const ElectionResults = () => {
     return(
         <div>
-            <>
+            <ResultsTable>
                 ELECTION RESULTS SECTION
-            </>
+            </ResultsTable>
         </div>
     )
-};
-
-
-
-export default ElectionResults;
+}

@@ -1,7 +1,7 @@
 import React from "react";
 
 
-const ResultsTable = props => {
+export const ResultsTable = props => {
 
 
     const loadCandidate = props => (
@@ -33,6 +33,3 @@ const ResultsTable = props => {
     )
 
 }
-
-
-export default ResultsTable;

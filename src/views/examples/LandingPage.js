@@ -30,33 +30,42 @@ import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js'
 import Footer from 'components/Footer/Footer.js'
 
 
-
-
 const LandingPage = () => {
-  // const [candidates, setCandidates] = useState([
-  //   {
-  //     id: null,
-  //     name: '',
-  //     voteCount: 0,
-  //   },
-  // ])
 
-  var provider
+  let provider
+  let signer
+
+  const [candidateCount, setCandidateCount] = useState(0)
+  const [candidateList, setCandidateList] = useState([])
+
+  
+  // useEffect(() => {
+    // document.body.classList.toggle('landing-page')
+
+    // return () => {
+    //   console.log('clean up')
+    //   document.body.classList.toggle('landing-page')
+    // }
+  // }, [])
+
+
+  useEffect(() => {
+
+    // return () => { console.log('clean up') }
+  },[])
+
+
   /*************************************************************/
   /* Step 1: Init Metamask                                     */
   /*  Connect to the default http://localhost:8545             */
   /*  const provider = new ethers.providers.JsonRpcProvider(); */
   /*************************************************************/
 
-  const initProvider = async () => {
-    provider = new ethers.providers.Web3Provider(window.ethereum)
-
-    // Get the balance of an account (by address or ENS name, if supported by network)
-    // const balance = (await provider.getBalance())
-
-    // console.log('this is my provider', provider)
-    // console.log('this is my signer', signer)
-    // console.log('this is my balance', balance)
+  const initProvider = () => {
+    let web3Provider = new ethers.providers.Web3Provider(window.ethereum)
+    if (web3Provider != null) {
+      provider = web3Provider
+    }
   }
 
   initProvider()
@@ -104,17 +113,9 @@ const LandingPage = () => {
     }
   }
 
-  // useEffect(() => {
-  //   document.body.classList.toggle('landing-page')
-  //   // Specify how to clean up after this effect:
-  //   return function cleanup() {
-  //     document.body.classList.toggle('landing-page')
-  //   }
-  // }, [])
-
   // Contract address or ENS like "dai.tokens.ethers.eth"
   // const electionAddress = 'Election.json'
-  const electionAddress = '0x8cFBBE48BdAC02d2A9F3AB98f5ba7529a63FF9e5'
+  const electionAddress = '0x16A368975e962ade55d787A13A115A73652fc4A6'
   // Contract ABI. Ignore any methods not needed
   // Human readable example: Get the account balance. "function balanceOf(address) view returns (uint)",
   const electionAbi = [
@@ -171,80 +172,54 @@ const LandingPage = () => {
       type: 'function',
     },
   ]
-  
-  
-  function CandidateInfo(_id, _name, _voteCount){
+
+  // connect provider/signer to metamask acct. instantiate contract instance obj
+  const contractInstance = new ethers.Contract(
+    electionAddress,
+    electionAbi,
+    provider
+  )
+
+  function CandidateInfo(_id, _name, _voteCount) {
     this.id = _id
     this.name = _name
     this.voteCount = _voteCount
   }
-  
-  const getCandidateInfo = async () => {
-    // FIXME Convert electionInfoArray, candidate count etc into State Vars for REACT
-    const electionInfoArray = []
-    // connect signer to metamask acct. instantiate contract instance obj
-    const contractInstance = new ethers.Contract(electionAddress,electionAbi,provider)
-    const totalCandidates = await contractInstance.candidatesCount()
-   
-    for (let i = 0; i < totalCandidates; i++) {
-      const candidate = await contractInstance.candidates(i)
-      let candInfo = new CandidateInfo(candidate.id, candidate.name, candidate.voteCount)
-      // FIXME this is the spot where we whould be updating the state variable
-      // then another ui function can check the state var for info
-      electionInfoArray[i] = candInfo
+
+  const getCandidateCount = async () => {
+    await contractInstance.candidatesCount().then((totalCandidates) => {
+      if (totalCandidates != null) {
+        setCandidateCount(totalCandidates)
+      }
+    })
+  }
+
+  const getCandidateList = async () => {
+    let electionInfoArray = []
+    if (candidateCount > 0) {
+      for (let i = 0; i < candidateCount; i++) {
+        let candidate = await contractInstance.candidates(i)
+        // // This will throw an error if the value is greater than or equal to Number.MAX_SAFE_INTEGER or less than or equal to Number.MIN_SAFE_INTEGER.
+        let bigNumHexId = candidate.id
+        let convertedId = bigNumHexId.toNumber()
+        electionInfoArray[i] = new CandidateInfo(convertedId,candidate.name,candidate.voteCount)
+      }
     }
     return electionInfoArray
   }
-      
 
-  getCandidateInfo().then(data => {
-    console.log(data)
-  })
-  
-  // for (let i = 0; i < candidateCount; i++) {
-  //   const candidate = candidates[i];
-  //   electionCandidate.id = candidate.id
-  //   electionCandidate.name = candidate.name
-  //   electionCandidate.voteCount = candidate.voteCount
-  // }
 
-  // console.log('QQQQQQQQQQQ', ...electionCandidate)
 
-  // get the data from the contract
-  // const getElectionCandidates = async () => {
-  //   let cInfo
-  //   let cCount = await electionContract.candidatesCount
-  //   for (let i = 0; i < cCount; i++) {
-  //     const candidate = electionContract.candidates[i]
-  //     const id = candidate.id
-  //     const name = candidate.name
-  //     const voteCount = candidate.voteCount
+  // TODO Pull this array data into JSX function .... then impliment the table in HTML section
+  // getCandidateInfo().then(data => {
+  //   console.log(data)
+  // })
 
-  //     cInfo = candidate
-  //   }
-  //   console.log('lhfkfj', cInfo)
-  //   return cInfo
-  // }
-
-  // const candidate = getElectionCandidates()
-
-  // const getCandidates = async () => {
-  //   const candidateCount = await electionContract().candidatesCount()
-  //   console.log('Candidate Count: ', candidateCount)
-  //   for (let i = 0; i <= candidateCount; i++) {
-  //     await electionContract()
-  //       .candidates(i)
-  //       .then((contractCandidate) => {
-  //         let newCandidateObject = {
-  //           id: contractCandidate.id,
-  //           name: contractCandidate.name,
-  //           voteCount: contractCandidate.voteCount,
-  //         }
-  //         console.log('Candidates pulled: ', contractCandidate.name,)
-  //         setCandidates([i].push(newCandidateObject))
-  //       })
-  //   }
-  // }
+  getCandidateCount()
+  getCandidateList()
+  console.log(candidateCount)
+  let x = candidateList.length
+  console.log(x)
 
   const formatTableData = (_count, candidates) => {
     return (
