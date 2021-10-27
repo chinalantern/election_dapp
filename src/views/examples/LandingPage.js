@@ -28,6 +28,8 @@ import bigChartData from 'variables/charts.js'
 // core components
 import ExamplesNavbar from 'components/Navbars/ExamplesNavbar.js'
 import Footer from 'components/Footer/Footer.js'
+import { ElectionResults } from 'components/ElectionResults'
+
 
 
 const LandingPage = () => {

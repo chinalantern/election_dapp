@@ -1,4 +1,6 @@
-import React from "react";
+import React from "react"
+// reactstrap components
+import { Table, Card, Container } from 'reactstrap'
 
 
 export const ResultsTable = props => {
@@ -6,11 +8,11 @@ export const ResultsTable = props => {
 
     const loadCandidate = props => (
         <tr>
-            <td className="text-center">props.id</td>
-            <td className="text-center">props.name</td>
-            <td className="text-center">props.votes</td>
+            <td className="text-center">ID</td>
+            <td className="text-center">NAME</td>
+            <td className="text-center">VOTES</td>
         </tr>
-    );
+    )
     
 
     return(
